@@ -1,7 +1,10 @@
 package com.example.sathya.map1;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
+//import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -9,24 +12,30 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.location.LocationListener;
 
-public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,LocationListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private GoogleApiClient mGoogleApiClient;
-    private Location mLocation=null;
+    private Location mLocation = null;
+    private LocationRequest mLocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mGoogleApiClient=new GoogleApiClient.Builder(this)
+
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
@@ -40,6 +49,14 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 
     @Override
     protected void onResume() {
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest=LocationRequest.create();
+        mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(2000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+
         super.onResume();
 
     }
@@ -80,27 +97,33 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap(Location loc) {
-        if(loc!=null){
-            mMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(),loc.getLongitude())).title("sathya"));
+        if (loc != null) {
+            mMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude())).title("sathya"));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(loc.getLatitude(), loc.getLongitude())));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(18));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
 
-        Toast.makeText(getApplicationContext(),"connected to GAPI Client",Toast.LENGTH_SHORT).show();
-        mLocation =LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Toast.makeText(getApplicationContext(), "connected to GAPI Client", Toast.LENGTH_SHORT).show();
+        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if(mLocation==null){
             Toast.makeText(getApplicationContext(),"Location Null",Toast.LENGTH_SHORT).show();
         }
-            setUpMapIfNeeded(mLocation);
+        setUpMapIfNeeded(mLocation);
 
 
+        startLocationUpdates();
 
 
+    }
 
+
+    protected void startLocationUpdates() {
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -113,4 +136,13 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     public void onConnectionFailed(ConnectionResult connectionResult) {
             Toast.makeText(getApplicationContext(),"failed",Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Toast.makeText(getApplicationContext(),"Location Changed",Toast.LENGTH_SHORT).show();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("sathya"));
+
+    }
+
+
 }
