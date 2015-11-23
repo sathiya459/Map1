@@ -41,7 +41,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     @Override
     protected void onResume() {
         super.onResume();
-       // setUpMapIfNeeded();
+
     }
 
     /**
