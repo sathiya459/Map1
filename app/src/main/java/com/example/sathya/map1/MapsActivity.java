@@ -103,7 +103,6 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
         }
     }
-
     @Override
     public void onConnected(Bundle bundle) {
 
